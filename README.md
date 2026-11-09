@@ -26,23 +26,23 @@ O script completo contendo as operações de CRUD e a carga realista de 30 regis
 
 ### Consulta 1: Histórico completo do dispositivo no dia
 `SELECT * FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26';`
-![Consulta 1](Screenshot 2026-11-09 000541)
+![Consulta 1](Consulta_1.png)
 
 ### Consulta 2: Leitura mais recente do sensor
 `SELECT * FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26' LIMIT 1;`
-![Consulta 2](Screenshot 2026-11-09 000548)
+![Consulta 2](Consulta_2.png)
 
 ### Consulta 3: Total de leituras geradas no dia
 `SELECT COUNT(*) FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26';`
-![Consulta 3](Screenshot 2026-11-09 000554)
+![Consulta 3](Consulta_3.png)
 
 ### Consulta 4: Projeção de dados específicos (Hora e Temperatura)
 `SELECT hora, temperatura FROM telemetria WHERE device_id = 'sensor_02' AND data = '2026-10-26';`
-![Consulta 4](Screenshot 2026-11-09 000559)
+![Consulta 4](Consulta_4.png)
 
 ### Consulta 5 (Ponto Forte): Busca por faixa de tempo
 `SELECT * FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26' AND hora >= '2026-10-26 09:00:00' AND hora <= '2026-10-26 10:00:00';`
-![Consulta 5](Screenshot 2026-11-09 000605)
+![Consulta 5](Consulta_5.png)
 
 ## 5. Comparativo com o Modelo Relacional (SQL)
 

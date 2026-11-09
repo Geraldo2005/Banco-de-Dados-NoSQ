@@ -1,60 +1,126 @@
-# Prática NoSQL - Banco de Dados Colunar (Apache Cassandra)
+# 📊 Telemetria IoT com Cassandra - Banco de Dados NoSQL
 
-## 1. Ambiente
-* **Banco Escolhido:** Apache Cassandra.
-* **Justificativa de Escolha:** O Cassandra foi escolhido entre as opções colunares por ser a solução líder de mercado para lidar com grande volume de escritas em sequências temporais e alta disponibilidade sem ponto único de falha, atendendo perfeitamente ao cenário de sensores IoT.
-* **Como Subir o Ambiente:**
-  * **Opção 1 (Nuvem - Utilizada):** Banco configurado no DataStax Astra DB (serviço gratuito em nuvem do Cassandra). O acesso é feito via painel web acessando o *CQL Console*.
-  * **Opção 2 (Docker Local):** Execute `docker-compose up -d` na raiz do repositório e acesse com `docker exec -it cassandra_iot cqlsh`.
+Este repositório contém a implementação prática de um banco de dados NoSQL da família de **Colunas**, desenvolvido como estudo de caso para a disciplina de Bancos de Dados NoSQL. 
 
-## 2. Modelagem
-A tabela `telemetria` foi modelada com uma chave primária composta:
-* **Partition Key (`device_id`, `data`):** Garante que todas as leituras de um mesmo sensor em um dia específico fiquem gravadas juntas fisicamente no mesmo nó de armazenamento.
-* **Clustering Key (`hora DESC`):** Organiza as leituras cronologicamente dentro do disco em ordem decrescente.
+O projeto simula a captação de dados de **Telemetria de Sensores IoT** (temperatura e humidade), processando milhares de leituras diárias de forma eficiente.
 
-**Perguntas que a modelagem responde de forma otimizada:**
-1. Qual o histórico completo de medições de um sensor em um dia específico?
-2. Qual foi a última medição recebida do sensor?
-3. Quantas medições foram registradas hoje por determinado dispositivo?
-4. Qual o histórico de variação apenas de temperatura de um sensor?
-5. Quais foram as leituras registradas dentro de um intervalo de tempo exato (ex: das 09h às 10h)?
+---
 
-## 3. Carga e Operações
-O script completo contendo as operações de CRUD e a carga realista de 30 registros encontra-se no arquivo [`script.cql`](./script.cql).
+## 🛠️ 1. Ambiente e Justificação da Escolha
 
-## 4. Consultas do Estudo de Caso
+**Banco de Dados Escolhido:** Apache Cassandra (via DataStax Astra DB Serverless).
 
-### Consulta 1: Histórico completo do dispositivo no dia
-`SELECT * FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26';`
-![Consulta 1](Consulta_1.png)
+> **Porquê o Cassandra?** 
+> Escolhemos o Cassandra (Astra DB) em vez do ScyllaDB ou HBase porque oferece uma arquitetura *LSM Tree* nativamente otimizada para altíssimas taxas de escrita contínua (ideal para sensores IoT) e permite-nos usar um ambiente *Serverless* 100% gerido na nuvem, dispensando a complexidade de configuração de clusters via Docker, garantindo alta disponibilidade e segurança através do *Secure Connect Bundle*.
 
-### Consulta 2: Leitura mais recente do sensor
-`SELECT * FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26' LIMIT 1;`
-![Consulta 2](Consulta_2.png)
+---
 
-### Consulta 3: Total de leituras geradas no dia
-`SELECT COUNT(*) FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26';`
-![Consulta 3](Consulta_3.png)
+## 🚀 2. Como Executar o Projeto (Passo a Passo)
 
-### Consulta 4: Projeção de dados específicos (Hora e Temperatura)
-`SELECT hora, temperatura FROM telemetria WHERE device_id = 'sensor_02' AND data = '2026-10-26';`
-![Consulta 4](Consulta_4.png)
+Qualquer pessoa pode clonar este repositório e correr o projeto do zero seguindo estes passos:
 
-### Consulta 5 (Ponto Forte): Busca por faixa de tempo
-`SELECT * FROM telemetria WHERE device_id = 'sensor_01' AND data = '2026-10-26' AND hora >= '2026-10-26 09:00:00' AND hora <= '2026-10-26 10:00:00';`
-![Consulta 5](Consulta_5.png)
+1. **Pré-requisitos:** Python 3.10+ instalado.
+2. **Clonar o repositório:**
+   ```bash
+   git clone [https://github.com/Geraldo2005/Banco-de-Dados-NoSQ.git](https://github.com/Geraldo2005/Banco-de-Dados-NoSQ.git)
+   cd Banco-de-Dados-NoSQ
 
-## 5. Comparativo com o Modelo Relacional (SQL)
+Logo depois.
 
-### Modelo SQL Equivalente (Tabela e Índice)
-```sql
-CREATE TABLE telemetria_relacional (
-    id SERIAL PRIMARY KEY,
-    device_id VARCHAR(50) NOT NULL,
-    data DATE NOT NULL,
-    hora TIMESTAMP NOT NULL,
-    temperatura NUMERIC(5,2),
-    umidade NUMERIC(5,2)
-);
+1. Criar e ativar o ambiente virtual:
 
-CREATE INDEX idx_telemetria_busca ON telemetria_relacional (device_id, data, hora DESC);
+python -m venv .venv
+# No Windows:
+.venv\Scripts\activate
+
+2. Instalar dependências:
+
+pip install cassandra-driver python-dotenv
+
+3. Configurar Credenciais (Astra DB):
+
+Crie um ficheiro .env na raiz do projeto.
+
+Adicione as suas chaves geradas no Astra DB:
+
+ASTRA_CLIENT_ID=seu_client_id_aqui
+ASTRA_SECRET=seu_secret_aqui
+Nota: O ficheiro secure-connect-iot-data.zip também deve estar na raiz.
+
+4. Executar a Carga e as Consultas:
+
+python carga_dados.py       # Insere os dados simulados
+python consultas_caso.py    # Executa as operações CRUD e exibe os resultados
+
+
+📐 3. Modelagem de Dados
+Num modelo orientado a colunas, modelamos com base nas consultas (Query-Driven Design).
+
+Estrutura da Tabela telemetria:
+
+Partition Keys (Chave de Partição): (device_id, data)
+
+Porquê? Garante que todas as medições de um sensor num dia específico ficam armazenadas no mesmo nó físico do cluster.
+
+Clustering Key (Chave de Agrupamento): hora (DESC)
+
+Porquê? Ordena os dados no disco cronologicamente, do mais recente para o mais antigo, otimizando buscas temporais.
+
+Colunas de Dados: temperatura (Float) e umidade (Float).
+
+Perguntas que o sistema responde:
+Qual o histórico de um dispositivo num dia? Facilitado pela Partition Key.
+
+Qual foi a leitura mais recente? Facilitado pela ordenação descendente da Clustering Key (tempo O(1)).
+
+Como se comportou o sensor numa faixa de horas específica? Facilitado pelo "Slice" sequencial no disco sem necessidade de ler a tabela inteira.
+
+🔍 4. Consultas do Estudo de Caso e Operações
+
+Abaixo estão as 5 consultas exigidas para o caso de uso, incluindo operações CRUD (Leitura, Atualização, Exclusão) e o recurso de Ponto Forte do banco colunar.
+
+Consulta 1: Leitura Pontual de um Sensor (Fim do dia)
+
+SQL
+
+SELECT hora, temperatura, umidade FROM telemetria 
+WHERE device_id = 'sensor_01' AND data = '2026-10-26' AND hora = '2026-10-26 23:30:00';
+
+Consulta 2: Leitura Mais Recente e Ordenação Inversa
+
+SQL
+
+SELECT hora, temperatura FROM telemetria 
+WHERE device_id = 'sensor_01' AND data = '2026-10-26' AND hora <= '2026-10-26 10:00:00' 
+ORDER BY hora DESC LIMIT 3;
+
+Consulta 3: Projeção de Dados (Apenas campos específicos)
+
+SQL
+
+SELECT hora, temperatura FROM telemetria 
+WHERE device_id = 'sensor_02' AND data = '2026-10-26';
+
+Consulta 4 (UPDATE e DELETE): Calibração e Limpeza de Anomalias
+
+SQL
+
+-- Atualizar leitura anómala
+UPDATE telemetria SET umidade = 49.5 WHERE device_id = 'sensor_01' AND data = '2026-10-26' AND hora = '2026-10-26 10:30:00';
+
+-- Apagar leitura errática
+DELETE FROM telemetria WHERE device_id = 'sensor_02' AND data = '2026-10-26' AND hora = '2026-10-26 00:30:00';
+
+🌟 Consulta 5: Ponto Forte do Modelo (Busca por Faixa de Tempo)
+O grande trunfo dos bancos de colunas é a leitura sequencial rápida de fatias de tempo dentro de uma mesma partição.
+
+SQL
+
+SELECT hora, temperatura, umidade FROM telemetria 
+WHERE device_id = 'sensor_02' AND data = '2026-10-26' 
+  AND hora >= '2026-10-26 14:00:00' AND hora <= '2026-10-26 17:00:00';
+
+⚖️ 5. Comparativo com o Modelo Relacional (SQL)
+Para uma análise detalhada de como este mesmo cenário seria modelado num banco de dados SQL e os motivos matemáticos e arquiteturais que provam a superioridade do Cassandra para este caso de uso IoT, consulte o documento anexo:
+
+👉 Ler Comparativo SQL vs NoSQL (comparativo_sql)

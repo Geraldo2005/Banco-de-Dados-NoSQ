@@ -53,7 +53,7 @@ python carga_dados.py       # Insere os dados simulados
 python consultas_caso.py    # Executa as operações CRUD e exibe os resultados
 
 
-📐 3. Modelagem de Dados
+## 📐 3. Modelagem de Dados
 Num modelo orientado a colunas, modelamos com base nas consultas (Query-Driven Design).
 
 Estrutura da Tabela telemetria:
@@ -75,7 +75,7 @@ Qual foi a leitura mais recente? Facilitado pela ordenação descendente da Clus
 
 Como se comportou o sensor numa faixa de horas específica? Facilitado pelo "Slice" sequencial no disco sem necessidade de ler a tabela inteira.
 
-🔍 4. Consultas do Estudo de Caso e Operações
+## 🔍 4. Consultas do Estudo de Caso e Operações
 
 Abaixo estão as 5 consultas exigidas para o caso de uso, incluindo operações CRUD (Leitura, Atualização, Exclusão) e o recurso de Ponto Forte do banco colunar.
 
@@ -120,7 +120,13 @@ SELECT hora, temperatura, umidade FROM telemetria
 WHERE device_id = 'sensor_02' AND data = '2026-10-26' 
   AND hora >= '2026-10-26 14:00:00' AND hora <= '2026-10-26 17:00:00';
 
-⚖️ 5. Comparativo com o Modelo Relacional (SQL)
+## ⚖️ 5. Comparativo com o Modelo Relacional (SQL)
 Para uma análise detalhada de como este mesmo cenário seria modelado num banco de dados SQL e os motivos matemáticos e arquiteturais que provam a superioridade do Cassandra para este caso de uso IoT, consulte o documento anexo:
 
 👉 Ler Comparativo SQL vs NoSQL (comparativo_sql)
+
+Alunos:
+
+Ricardo Augusto Lopes Barbosa
+Pablo Caldeira Gomes Monteiro
+Geraldo Sousa de Oliveira Neto

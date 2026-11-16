@@ -127,6 +127,6 @@ Para uma análise detalhada de como este mesmo cenário seria modelado num banco
 
 Alunos:
 
-Ricardo Augusto Lopes Barbosa
-Pablo Caldeira Gomes Monteiro
-Geraldo Sousa de Oliveira Neto
+Ricardo Augusto Lopes Barbosa,
+Pablo Caldeira Gomes Monteiro e
+Geraldo Sousa de Oliveira Neto.
